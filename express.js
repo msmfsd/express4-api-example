@@ -16,20 +16,24 @@ app.param('collectionName', function(req, res, next, collectionName){
 })
 
 app.get('/', function(req, res, next) {
-  res.send('please select a collection, e.g., /collections/messages')
+  res.send('<a href="/collections">View all collections</a>')
 })
 
 app.get('/collections', function(req, res, next) {
-  db.bind('test')
-  db.test.find().toArray(function(e, items) {
-    if (e) return next(e)
-    res.send(items)
+  var colls = ''
+  db.collectionNames(function(err, items) {
+    if (err) return next(err)
+    items.forEach(function(item) {
+      var str = item.name.split('.');
+      if(str[1] !== 'system') colls += '<a href="/collections/' + str[1] + '">' + str[1] + '<a/><br />'
+    })
+    res.send(colls)
   })
 })
 
 app.get('/collections/:collectionName', function(req, res, next) {
-  req.collection.find({} ,{limit: 10, sort: {'_id': -1}}).toArray(function(e, results){
-    if (e) return next(e)
+  req.collection.find({} ,{limit: 10, sort: {'_id': -1}}).toArray(function(err, results){
+    if (err) return next(err)
     res.send(results)
   })
 })
